@@ -1,0 +1,564 @@
+				;file D:\IIIT\Documents\HTK_Project\acc\acc.c
+				;1	// PROGRAM	: 2-4.c								2014.0101
+				;2	// FUNCTION	: STM PWM Servo Control with 		By Steven
+				;3	#include <HT66F70A.h>
+				;4	#define	 SEGPort		_pd
+				;5	#define	 SEGPortC		_pdc
+				;6	#define  ScanPort		_pe
+				;7	#define	 ScanPortC		_pec
+				;8	#define	 SW_DutyUpPU	_pepu6		//PEPU.6
+				;9	#define	 SW_DutyUp		_pe6		//PE.6
+				;10	#define	 SW_DutyUpC		_pec6		//PEC.6
+				;11	#define	 SW_DutyDnPU	_pepu7		//PEPU.7
+				;12	#define	 SW_DutyDn		_pe7		//PE.7
+				;13	#define	 SW_DutyDnC		_pec7		//PEC.7
+				;14	typedef	unsigned char	u8;
+				;15	typedef	char			s8;
+				;16	typedef	unsigned short	u16;
+				;17	typedef	short			s16;
+				;18	typedef	unsigned long	u32;
+				;19	typedef	long			s32;
+				;20	const u8 SEG_TAB[] = {							//七段顯示碼建表區(共陰)
+				;21				0x3F,0x06,0x5B,0x4F,0x66,
+				;22				0x6D,0x7D,0x07,0x7F,0x67};
+				;23	u8 *ptr,ScanCode,Buffer[4];	
+				;24	void Delay100us(u16);							//函式原型宣告		 
+				;25	void main()
+				;26	{	s16 temp,Index=100;
+				@code .SECTION 'CODE'
+				include HT66F70A.inc
+0000	1F0B	clr     BP
+0001	2802	jmp     _main_startup1
+				@start .SECTION 'CODE'
+				_main_startup1:
+				@start .SECTION 'CODE'
+0002	0F00	mov     a, 0H
+0003	008B	mov     BP, a
+0004	28C4	jmp     _main
+00E8	0F64	mov     a, 64H
+00E9	4092	mov     _main_2, a
+00EA	5F13	clr     _main_2[1]
+				;27		_wdtc=0b10101111;							//關閉看們狗計時器
+				_main:
+				_main:
+00C4	0FAF	mov     a, AFH
+00C5	00BE	mov     WDTC, a
+				;28		SEGPort=0; SEGPortC=0; 						//規劃SEGPort為輸出屬性
+00C6	1F1E	clr     PD
+00C7	1F1F	clr     PDC
+				;29		ScanPort&=0xF0; ScanPortC&=0xF0;			//規劃ScanPort[3:0]為輸出屬性
+00C8	0FF0	mov     a, F0H
+00C9	06A2	andm    a, PE
+00CA	0FF0	mov     a, F0H
+00CB	06A3	andm    a, PEC
+				;30		ptr=Buffer; ScanCode=0b10000000;		    //指標初值設定
+00CC	0F97	mov     a, 97H
+00CD	4095	mov     ptr[0], a
+00CE	0F00	mov     a, 0H
+00CF	4096	mov     ptr[1], a
+00D0	0F80	mov     a, 80H
+00D1	4094	mov     ScanCode[0], a
+				;31		SW_DutyUpC=1; SW_DutyUpPU=1;			   	//規劃按鍵腳位為輸入屬性並啟用提升電阻
+00D2	3323	set     PEC6
+00D3	3321	set     PEPU6
+				;32		SW_DutyDnC=1; SW_DutyDnPU=1;		   	
+00D4	33A3	set     PEC7
+00D5	33A1	set     PEPU7
+				;33		_psc0=0x01; _tbc0=0x85;_tb0e=1;				//fTB=fSYS/4,週期=8192*fTB,致能TB0中斷	
+00D6	0F01	mov     a, 1H
+00D7	00E4	mov     PSC0, a
+00D8	0F85	mov     a, 85H
+00D9	00E5	mov     TBC0, a
+00DA	30B2	set     TB0E
+				;34		_pcs1=0x10; _pcs2=0x01;						//設定PC3/PC4為TP2功能
+00DB	0F10	mov     a, 10H
+00DC	80E9	lmov    PCS1, a
+00DE	0F01	mov     a, 1H
+00DF	80EA	lmov    PCS2, a
+				;35		_tm2c0=0b00000000;							//fINT=fSYS(8MHz)/4 (0.5us)
+00E1	1F51	clr     TM2C0
+				;36		_tm2c1=0b10101000;							//PWM/Active High/TM2R控制週期
+00E2	0FA8	mov     a, A8H
+00E3	00D2	mov     TM2C1, a
+				;37		_tm2rp=160;									//週期=256*160*0.5us=20.48ms
+00E4	0FA0	mov     a, A0H
+00E5	00D7	mov     TM2RP, a
+				;38		_t2on=1; _emi=1;							//起始TM1計數並致能EMI
+00E6	31D1	set     T2ON
+00E7	3030	set     EMI
+				;39		while(1)
+				;40		{	temp=Index*20+2500;						//轉換為佔空比參數
+				_L11:
+00EB	4712	mov     a, _main_2
+00EC	408A	mov     del, a
+00ED	4713	mov     a, _main_2[1]
+00EE	408B	mov     del[1], a
+00EF	0F14	mov     a, 14H
+00F0	408C	mov     del[2], a
+00F1	5F0D	clr     del[3]
+00F2	20B1	call    L00B1
+00F3	470E	mov     a, del[4]
+00F4	4083	mov     rd, a
+00F5	470F	mov     a, del[5]
+00F6	4084	mov     re, a
+00F7	0FC4	mov     a, C4H
+00F8	4383	addm    a, rd
+00F9	0F09	mov     a, 9H
+00FA	5384	adcm    a, re
+				;41			_tm2al=temp%256;						//設定佔空比參數
+00FB	4703	mov     a, rd
+00FC	4081	mov     rb, a
+00FD	4704	mov     a, re
+00FE	4082	mov     rc, a
+00FF	0FFF	mov     a, FFH
+0100	4681	andm    a, rb
+0101	0F80	mov     a, 80H
+0102	4682	andm    a, rc
+0103	7B82	snz     rc.7
+0104	2910	jmp     _L12
+0105	0FFF	mov     a, FFH
+0106	4381	addm    a, rb
+0107	0FFF	mov     a, FFH
+0108	5382	adcm    a, rc
+0109	0FFF	mov     a, FFH
+010A	4582	orm     a, rc
+010B	0F00	mov     a, 0H
+010C	4581	orm     a, rb
+010D	5481	inc     rb
+010E	3D0A	sz      Z
+010F	5482	inc     rc
+				_L12:
+0110	4701	mov     a, rb
+0111	00D5	mov     TM2AL, a
+				;42			_tm2ah=temp/256;					
+0112	4703	mov     a, rd
+0113	4081	mov     rb, a
+0114	4704	mov     a, re
+0115	4082	mov     rc, a
+0116	7B84	snz     re.7
+0117	291E	jmp     _L13
+0118	0FFF	mov     a, FFH
+0119	4303	add     a, rd
+011A	4081	mov     rb, a
+011B	0F00	mov     a, 0H
+011C	5304	adc     a, re
+011D	4082	mov     rc, a
+				_L13:
+011E	4702	mov     a, rc
+011F	00D6	mov     TM2AH, a
+				;43			temp>>=1;								//轉換為Ton時間
+0120	5A04	rlca    re
+0121	5B84	rrc     re
+0122	5B83	rrc     rd
+				;44			Buffer[3]=temp/1000; temp%=1000;		//更新顯示值
+0123	4703	mov     a, rd
+0124	408A	mov     del, a
+0125	4704	mov     a, re
+0126	408B	mov     del[1], a
+0127	0FE8	mov     a, E8H
+0128	408C	mov     del[2], a
+0129	0F03	mov     a, 3H
+012A	408D	mov     del[3], a
+012B	207A	call    L007A
+012C	470A	mov     a, del
+012D	4081	mov     rb, a
+012E	470B	mov     a, del[1]
+012F	4082	mov     rc, a
+0130	4701	mov     a, rb
+0131	409A	mov     Buffer[3], a
+0132	4703	mov     a, rd
+0133	408A	mov     del, a
+0134	4704	mov     a, re
+0135	408B	mov     del[1], a
+0136	0FE8	mov     a, E8H
+0137	408C	mov     del[2], a
+0138	0F03	mov     a, 3H
+0139	408D	mov     del[3], a
+013A	207A	call    L007A
+013B	470E	mov     a, del[4]
+013C	4083	mov     rd, a
+013D	470F	mov     a, del[5]
+013E	4084	mov     re, a
+				;45			Buffer[2]=temp/100;  temp%=100;
+013F	4703	mov     a, rd
+0140	408A	mov     del, a
+0141	4704	mov     a, re
+0142	408B	mov     del[1], a
+0143	0F64	mov     a, 64H
+0144	408C	mov     del[2], a
+0145	0F00	mov     a, 0H
+0146	408D	mov     del[3], a
+0147	207A	call    L007A
+0148	470A	mov     a, del
+0149	4081	mov     rb, a
+014A	470B	mov     a, del[1]
+014B	4082	mov     rc, a
+014C	4701	mov     a, rb
+014D	4099	mov     Buffer[2], a
+014E	4703	mov     a, rd
+014F	408A	mov     del, a
+0150	4704	mov     a, re
+0151	408B	mov     del[1], a
+0152	0F64	mov     a, 64H
+0153	408C	mov     del[2], a
+0154	0F00	mov     a, 0H
+0155	408D	mov     del[3], a
+0156	207A	call    L007A
+0157	470E	mov     a, del[4]
+0158	4083	mov     rd, a
+0159	470F	mov     a, del[5]
+015A	4084	mov     re, a
+				;46			Buffer[1]=temp/10; Buffer[0]=temp%10;
+015B	4703	mov     a, rd
+015C	408A	mov     del, a
+015D	4704	mov     a, re
+015E	408B	mov     del[1], a
+015F	0F0A	mov     a, AH
+0160	408C	mov     del[2], a
+0161	0F00	mov     a, 0H
+0162	408D	mov     del[3], a
+0163	207A	call    L007A
+0164	470A	mov     a, del
+0165	4081	mov     rb, a
+0166	470B	mov     a, del[1]
+0167	4082	mov     rc, a
+0168	4701	mov     a, rb
+0169	4098	mov     Buffer[1], a
+016A	4703	mov     a, rd
+016B	408A	mov     del, a
+016C	4704	mov     a, re
+016D	408B	mov     del[1], a
+016E	0F0A	mov     a, AH
+016F	408C	mov     del[2], a
+0170	0F00	mov     a, 0H
+0171	408D	mov     del[3], a
+0172	207A	call    L007A
+0173	470E	mov     a, del[4]
+0174	4083	mov     rd, a
+0175	470F	mov     a, del[5]
+0176	4084	mov     re, a
+0177	4703	mov     a, rd
+0178	4097	mov     Buffer[0], a
+				;47			Delay100us(12);						//延遲120ms
+0179	0F0C	mov     a, CH
+017A	408A	mov     del, a
+017B	5F0B	clr     del[1]
+017C	2005	call    _Delay100us
+				;48			while(1)
+				;49			{	if(!SW_DutyUp)
+				_L18:
+017D	3F22	sz      PE6
+017E	298C	jmp     _L14
+				;50				{	if(++Index>=200) Index=200;		//若按下遞增鍵,指標遞增(上限200) 
+017F	5492	inc     _main_2
+0180	3D0A	sz      Z
+0181	5493	inc     _main_2[1]
+0182	0FC7	mov     a, C7H
+0183	4212	sub     a, _main_2
+0184	0F00	mov     a, 0H
+0185	5213	sbc     a, _main_2[1]
+0186	3B8A	snz     SC
+0187	28EB	jmp     _L11
+0188	0FC8	mov     a, C8H
+0189	4092	mov     _main_2, a
+018A	5F13	clr     _main_2[1]
+018B	28EB	jmp     _L11
+				;51					break;   	
+				;52				}
+				;53				if(!SW_DutyDn) 						//若按下遞減鍵,指標遞減(下限0) 
+				_L14:
+018C	3FA2	sz      PE7
+018D	297D	jmp     _L18
+018E	0FFF	mov     a, FFH
+018F	4392	addm    a, _main_2
+0190	0FFF	mov     a, FFH
+0191	5393	adcm    a, _main_2[1]
+0192	7B93	snz     _main_2[1].7
+0193	28EB	jmp     _L11
+0194	5F12	clr     _main_2
+0195	5F13	clr     _main_2[1]
+0196	28EB	jmp     _L11
+0197	2997	jmp     $
+0198	1483	inc     MP1L
+				L0199:
+0199	3F84	sz      MP1H.7
+019A	299D	jmp     L019D
+019B	0702	mov     a, [02H]
+019C	0003	ret
+				L019D:
+019D	1B04	rrca    MP1H
+019E	0E3F	and     a, 3FH
+019F	0089	mov     TBHP, a
+01A0	1B03	rrca    MP1L
+01A1	0087	mov     TBLP, a
+01A2	1D05	tabrd   ACC
+01A3	3C0A	sz      C
+01A4	0708	mov     a, TBLH
+01A5	0003	ret
+				L0D66:
+				org	0d66h
+0D66	0000	nop
+				L0F7F:
+				org	0f7fh
+0F7F	0000	nop
+				;54				{	if(--Index<=0) Index=0;
+				;55					break;   	
+				;56				}
+				;57			}
+				;58		}
+				;59	}
+				;60	DEFINE_ISR(ISR_TB0,0x24)
+				;61	{	SEGPort=0b00000000;							//關閉七段但保留dp節段
+				@ISR_TB0_code .SECTION 'CODE'
+0024	4085	mov     r124, a
+0025	070B	mov     a, BP
+0026	1F0B	clr     BP
+0027	2828	jmp     _ISR_TB0
+				_ISR_TB0:
+				_ISR_TB0:
+				@dummy36 .SECTION 'CODE'
+0028	4086	mov     r224, a
+0029	070A	mov     a, STATUS
+002A	409B	mov     r324, a
+002B	0703	mov     a, MP1L
+002C	409C	mov     r424, a
+002D	0704	mov     a, MP1H
+002E	409D	mov     r524, a
+002F	0707	mov     a, TBLP
+0030	409E	mov     r624, a
+0031	0709	mov     a, TBHP
+0032	409F	mov     r724, a
+0033	1F1E	clr     PD
+				;62		GCC_RL(ScanCode);							//更新掃描碼
+0034	5894	rl      ScanCode[0]
+				;63		if(ScanCode==0b00010000)					//若已掃完四顆
+0035	4714	mov     a, ScanCode[0]
+0036	0A10	sub     a, 10H
+0037	390A	snz     Z
+0038	283F	jmp     _L2
+				;64		{	ScanCode=0b00000001; ptr=Buffer;	    //重新初始指標與掃描碼	
+0039	0F01	mov     a, 1H
+003A	4094	mov     ScanCode[0], a
+003B	0F97	mov     a, 97H
+003C	4095	mov     ptr[0], a
+003D	0F00	mov     a, 0H
+003E	4096	mov     ptr[1], a
+				;65		}
+				;66		ScanPort=ScanCode;							//送出掃描碼								
+				_L2:
+003F	4714	mov     a, ScanCode[0]
+0040	00A2	mov     PE, a
+				;67		SEGPort=SEG_TAB[*ptr++];					//送出節段碼
+0041	4715	mov     a, ptr[0]
+0042	4087	mov     rb24, a
+0043	4716	mov     a, ptr[1]
+0044	4088	mov     rc24, a
+0045	0F01	mov     a, 1H
+0046	4307	add     a, rb24
+0047	4095	mov     ptr[0], a
+0048	0F00	mov     a, 0H
+0049	5308	adc     a, rc24
+004A	4096	mov     ptr[1], a
+004B	4707	mov     a, rb24
+004C	0083	mov     MP1L, a
+004D	4708	mov     a, rc24
+004E	0084	mov     MP1H, a
+004F	2199	call    L0199
+0050	4089	mov     ra24, a
+0051	0FEA	mov     a, EAH
+0052	4309	add     a, ra24
+0053	0083	mov     MP1L, a
+0054	0F80	mov     a, 80H
+0055	1F04	clr     MP1H
+0056	1384	adcm    a, MP1H
+0057	2199	call    L0199
+0058	009E	mov     PD, a
+				;68		if(ScanCode==0b000001000) SEGPort|=1<<7;	//點亮千位數的dp節段
+0059	4714	mov     a, ScanCode[0]
+005A	0A08	sub     a, 8H
+005B	390A	snz     Z
+005C	285E	jmp     _L1
+005D	339E	set     PD7
+				_L1:
+005E	4706	mov     a, r224
+005F	008B	mov     BP, a
+0060	471B	mov     a, r324
+0061	008A	mov     STATUS, a
+0062	471C	mov     a, r424
+0063	0083	mov     MP1L, a
+0064	471D	mov     a, r524
+0065	0084	mov     MP1H, a
+0066	471E	mov     a, r624
+0067	0087	mov     TBLP, a
+0068	471F	mov     a, r724
+0069	0089	mov     TBHP, a
+006A	1D05	tabrd   ACC
+006B	4705	mov     a, r124
+006C	0004	reti
+006D	0000	nop
+006E	0000	nop
+006F	0000	nop
+0070	0000	nop
+0071	0000	nop
+0072	0000	nop
+0073	0000	nop
+0074	0000	nop
+0075	063F	and     a, SMOD2
+0076	4F5B	dc	04F5BH
+0077	6D66	jmp     D66H
+0078	077D	mov     a, FD3H
+0079	677F	call    F7FH
+				L007A:
+007A	5F10	clr     del[6]
+007B	7B8B	snz     del[1].7
+007C	2883	jmp     L0083
+007D	418A	cpl     del
+007E	418B	cpl     del[1]
+007F	548A	inc     del
+0080	3D0A	sz      Z
+0081	548B	inc     del[1]
+0082	5590	dec     del[6]
+				L0083:
+0083	7B8D	snz     del[3].7
+0084	288C	jmp     L008C
+0085	418C	cpl     del[2]
+0086	418D	cpl     del[3]
+0087	548C	inc     del[2]
+0088	3D0A	sz      Z
+0089	548D	inc     del[3]
+008A	5490	inc     del[6]
+008B	5490	inc     del[6]
+				L008C:
+008C	5F0E	clr     del[4]
+008D	5F0F	clr     del[5]
+008E	0F10	mov     a, 10H
+008F	4091	mov     del[7], a
+				L0090:
+0090	340A	clr     C
+0091	5A8A	rlc     del
+0092	5A8B	rlc     del[1]
+0093	5A8E	rlc     del[4]
+0094	5A8F	rlc     del[5]
+0095	470E	mov     a, del[4]
+0096	420C	sub     a, del[2]
+0097	470F	mov     a, del[5]
+0098	520D	sbc     a, del[3]
+0099	380A	snz     C
+009A	28A0	jmp     L00A0
+009B	408F	mov     del[5], a
+009C	470E	mov     a, del[4]
+009D	420C	sub     a, del[2]
+009E	408E	mov     del[4], a
+009F	548A	inc     del
+				L00A0:
+00A0	5791	sdz     del[7]
+00A1	2890	jmp     L0090
+00A2	7810	snz     del[6].0
+00A3	28A9	jmp     L00A9
+00A4	418E	cpl     del[4]
+00A5	418F	cpl     del[5]
+00A6	548E	inc     del[4]
+00A7	3D0A	sz      Z
+00A8	548F	inc     del[5]
+				L00A9:
+00A9	7890	snz     del[6].1
+00AA	28B0	jmp     L00B0
+00AB	418A	cpl     del
+00AC	418B	cpl     del[1]
+00AD	548A	inc     del
+00AE	3D0A	sz      Z
+00AF	548B	inc     del[1]
+				L00B0:
+00B0	0003	ret
+				L00B1:
+00B1	5F0E	clr     del[4]
+00B2	5F0F	clr     del[5]
+				L00B3:
+00B3	780C	snz     del[2].0
+00B4	28B9	jmp     L00B9
+00B5	470A	mov     a, del
+00B6	438E	addm    a, del[4]
+00B7	470B	mov     a, del[1]
+00B8	538F	adcm    a, del[5]
+				L00B9:
+00B9	340A	clr     C
+00BA	5A8A	rlc     del
+00BB	5A8B	rlc     del[1]
+00BC	340A	clr     C
+00BD	5B8D	rrc     del[3]
+00BE	5B8C	rrc     del[2]
+00BF	470C	mov     a, del[2]
+00C0	450D	or      a, del[3]
+00C1	390A	snz     Z
+00C2	28B3	jmp     L00B3
+00C3	0003	ret
+				;69	}
+				;70	void Delay100us(u16 del)						//延遲del*200指令週期
+				;71	{	u16 i,j;									//@fSYS=8MH,延遲del*100us
+				;72		for(i=0;i<del;i++)
+				_Delay100us:
+				_Delay100us:
+0005	5F01	clr     rb
+0006	5F02	clr     rc
+				_L6:
+0007	4701	mov     a, rb
+0008	420A	sub     a, del[0]
+0009	4702	mov     a, rc
+000A	520B	sbc     a, del[1]
+000B	3F0A	sz      CZ
+000C	2818	jmp     _L5
+000D	5F00	clr     ra
+0014	5481	inc     rb
+0015	3D0A	sz      Z
+0016	5482	inc     rc
+0017	2807	jmp     _L6
+				_L5:
+0018	0003	ret
+				org	024h
+				;73			for(j=0;j<=25;j++) GCC_NOP();
+				_L9:
+000E	0000	nop
+000F	5480	inc     ra
+0010	4700	mov     a, ra
+0011	0A1A	sub     a, 1AH
+0012	390A	snz     Z
+0013	280E	jmp     _L9
+				;74	}
+				data .SECTION 'DATA'
+				__pd DB DUP (?) ; __pd
+				__pdc DB DUP (?) ; __pdc
+				__pepu DB DUP (?) ; __pepu
+				__pe DB DUP (?) ; __pe
+				__pec DB DUP (?) ; __pec
+				__intc0 DB DUP (?) ; __intc0
+				__intc2 DB DUP (?) ; __intc2
+				__wdtc DB DUP (?) ; __wdtc
+				__tm2c0 DB DUP (?) ; __tm2c0
+				__tm2c1 DB DUP (?) ; __tm2c1
+				__tm2al DB DUP (?) ; __tm2al
+				__tm2ah DB DUP (?) ; __tm2ah
+				__tm2rp DB DUP (?) ; __tm2rp
+				__psc0 DB DUP (?) ; __psc0
+				__tbc0 DB DUP (?) ; __tbc0
+				ra DB DUP (?)
+				rb DB DUP (?)
+				rc DB DUP (?)
+				rd DB DUP (?)
+				re DB DUP (?)
+				r124 DB DUP (?)
+				r224 DB DUP (?)
+				rb24 DB DUP (?)
+				rc24 DB DUP (?)
+				ra24 DB DUP (?)
+				del DB 2 DUP (?) ; del
+				_main_2 DB DUP (?)
+				ScanCode DB DUP (?) ; ScanCode
+				ptr DB DUP (?) ; ptr
+				Buffer DB DUP (?) ; Buffer
+				r324 DB DUP (?)
+				r424 DB DUP (?)
+				r524 DB DUP (?)
+				r624 DB DUP (?)
+				r724 DB DUP (?)
+				__pcs1 DB DUP (?) ; __pcs1
+				__pcs2 DB DUP (?) ; __pcs2
