@@ -27,85 +27,76 @@
 void Delay100us(short);	
 void _SPI_CS(unsigned short);
 void _SPI_SCL(unsigned short);
-unsigned char ADXL345_SPI_Read(unsigned char);
-void delay_ms(unsigned char);
-void ADXL345_SPI_Write(unsigned char , unsigned char);
+char ADXL345_SPI_Read(char);
+void ADXL345_SPI_Write(char ,char);
 void LCD_Cmd(unsigned char data);
 void LCD_Senddata(unsigned char data);
 void LCD_Reset(void);
 void PinSet(void);
-void DataFormat(void);
 void PrintLCD(unsigned char);
-unsigned char DATAX0 = 0x32;
-unsigned char DATAX1 = 0x33;
-unsigned char DATAY0 = 0x34;
-unsigned char DATAY1 = 0x35;
-unsigned char DATAZ0 = 0x36;
-unsigned char DATAZ1 = 0x37;
-char i;
-double x[10];
-double y[10];
-double z[10];
 int RawDataX[2],RawDataY[2],RawDataZ[2];
 int* ptrRawData[] =
 {&RawDataX[0],&RawDataX[1],&RawDataY[0],&RawDataY[1],&RawDataZ[0],&RawDataZ[1]};
 int AccX,AccY,AccZ;
 int* ptrAcc[] = {&AccX,&AccY,&AccZ};
 char deviceID;
+short a,b,i;
+char DATAX0 = 0x32;
+char DATAX1 = 0x33;
+char DATAY0 = 0x34;
+char DATAY1 = 0x35;
+char DATAZ0 = 0x36;
+char DATAZ1 = 0x37;
 
 void main()
 {
 	PinSet();	//腳位設定
-	delay_ms(2);
-	ADXL345_SPI_Write(0x31, 0x0B); //設定測量範圍&資料格式
-	ADXL345_SPI_Write(0x2D, 0x08); //開始測量
-	ADXL345_SPI_Write(0x2E, 0x80);
-	ADXL345_SPI_Write(0x2c, 0x0F);
+	Delay100us(200);
+	ADXL345_SPI_Write(0x31,0x0B); //設定測量範圍&資料格式
+	ADXL345_SPI_Write(0x2D,0x08); //開始測量
+	//ADXL345_SPI_Write(0x2c, 0x0F);
 	
-	LCD_Reset();		//LCD重置
-	delay_ms(250);		//延遲20毫秒 				
+	LCD_Reset();		//LCD重置			
 	LCD_Cmd(0xc0);  	//LCD第一行顯示
-	delay_ms(250);   
-	
-
+  
 	while(1)
-	{/*
-		delay_ms(250);
+	{
 		for(i=5;i>=0;i--)
 		{
-			*ptrRawData[i] = (int)ADXL345_SPI_Read(i+50);
+			*ptrRawData[i] = ADXL345_SPI_Read(i+50);
 		}
-		for(i=0;i<3;i++)
+		/*for(i=0;i<3;i++)
 		{
 			*ptrAcc[i] = ((*ptrRawData[1+i*2]<<8)&0xFF00) | (*ptrRawData[0+i*2]&0xFF);
 			*ptrAcc[i] = *ptrAcc[i] * 4;
 		}*/
-		/*
-		Delay100us(100);
-		LCD_Cmd(0x80);  //從第一行第0位置開始顯示   C0為第二行
-		delay_ms(150);
-	 	PrintLCD(*ptrAcc[0]);
-	  	delay_ms(50);
-	  	
-	  	Delay100us(100);
-	  	LCD_Cmd(0x86);	//從第一行第5位置開始顯示
-	 	delay_ms(150);
-	  	PrintLCD(*ptrAcc[1]);
-		delay_ms(50);
+		/*AccX = ((RawDataX[1]<<8)&0xFF00)|(RawDataX[0]&0xFF);
+		AccX = AccX*4;
+		AccY = ((RawDataY[1]<<8)&0xFF00)|(RawDataY[0]&0xFF);
+		AccY = AccY*4;
+		AccZ = ((RawDataZ[1]<<8)&0xFF00)|(RawDataZ[0]&0xFF);
+		AccZ = AccZ*4;*/
 		
-		Delay100us(100);
+		/*AccX = (((int)ADXL345_SPI_Read(DATAX1)&0xFF00)) | ((int)ADXL345_SPI_Read(DATAX0)&0xFF);
+		AccY = (((int)ADXL345_SPI_Read(DATAY1)&0xFF00)) | ((int)ADXL345_SPI_Read(DATAY0)&0xFF);
+		AccZ = (((int)ADXL345_SPI_Read(DATAZ1)&0xFF00)) | ((int)ADXL345_SPI_Read(DATAZ0)&0xFF);*/
+		
+		/*AccX = ((int)ADXL345_SPI_Read(DATAX1)<<8)|(int)ADXL345_SPI_Read(DATAX0);
+		AccY = ((int)ADXL345_SPI_Read(DATAY1)<<8)|(int)ADXL345_SPI_Read(DATAY0);
+		AccZ = ((int)ADXL345_SPI_Read(DATAZ1)<<8)|(int)ADXL345_SPI_Read(DATAZ0);*/
+		
+		LCD_Cmd(0x80);  //從第一行第0位置開始顯示   C0為第二行
+	 	PrintLCD(AccX);
+	  	
+	  	LCD_Cmd(0x86);	//從第一行第5位置開始顯示
+	  	PrintLCD(AccY);
+		
 		LCD_Cmd(0x8d);	//從第一行第5位置開始顯示
-	 	delay_ms(150);
-	  	PrintLCD(*ptrAcc[2]);
-		delay_ms(50);
-		*/
-		delay_ms(255);
-		deviceID = ADXL345_SPI_Read(0x00);
-		Delay100us(100);
-		LCD_Cmd(0xc0);	//從第一行第5位置開始顯示
-	 	delay_ms(255);
+	  	PrintLCD(AccZ);
+
+		deviceID = ADXL345_SPI_Read(0x44);
+		LCD_Cmd(0xc0);	//從第二行第0位置開始顯示
 	  	PrintLCD(deviceID);
-		delay_ms(50);
 	}
 }
 //////////////////////////////
@@ -113,16 +104,16 @@ void main()
 //////////////////////////////
 void PinSet(void)
 {
-	_wdtc = 0xa8;//關閉看門狗
+	_wdtc = 0b10101111;//關閉看門狗
 	_cp0c = 0x00;	//類比比較器功能關閉
 	_cp1c = 0x00;
 	_scomen = 0;
 	_smod = 0xe0;//4MHz
-	_sdis0=0;
+	/*_sdis0=0;
 	_sdis1=0;
 	_simen=1;  
 	_simc0=0x42;
-	_simc2=0x24;
+	_simc2=0x24;*/
 	
 	//PAS2=0x10;  //設定各個腳位功能
 	//PAS3=0x22;  
@@ -131,45 +122,43 @@ void PinSet(void)
 	
 	_ifs4=0;
 	
-	_pac5=0; 	_pac6=1; 	_pac7=0;		CSC=0;//設定I/O
-	_phc0 = 0; _phc1 = 0; _phc2 = 0; //設置PH0、PH1、PH2為輸出   
-	SDIPU=1;	SDOPU=1;	SCKPU=1;	CSPU=1;		SCK=0;		CS=1;		_pgc = 0x00;   
+	_pac5=0; 	_pac6=1; 	_pac7=0;	CSC=0;//設定I/O
+	_phc0 =0;   _phc1=0;    _phc2=0; //設置PH0、PH1、PH2為輸出   
+	SCK=0;		CS=1;		_pgc = 0x00;   
 }
 
 
 //////////////////////////////
 ///SPI讀取涵式
 //////////////////////////////
-unsigned char ADXL345_SPI_Read(unsigned char Address)
+char ADXL345_SPI_Read(char Address)
 {
-  unsigned char ReadData=0;
-  unsigned char tempSDO;
-  
-  short i;
- 
+  char ReadData=0;
+  char tempSDO;
   _SPI_CS(0);
-  
-  for(i = 7; i >= 0; i-- )
-  {
+  a=7;
+  do{
     // F-Edge
+    /*LCD_Cmd(0x80);
+    PrintLCD(a);*/
     _SPI_SCL(1);
-    SDO = 0x1 & ((0x80 | Address) >> i);
+    SDO = 0x1 & ((0x80 | Address) >> a);
     _SPI_SCL(0);
-  }
+    a--;
+  }while(a!=0);
  
   //===========================
   _SPI_SCL(1);
   //===========================
- 
-  for(i = 7; i >= 0; i-- )
-  {
+  a=7;
+  do{
     // R-Edge
     _SPI_SCL(0);
     _SPI_SCL(1);
     tempSDO = SDI; // Read bit
- 
-    ReadData |= tempSDO << i;
-  }
+    ReadData |= tempSDO << a;
+    a--;
+  }while(a>=0);
  
   _SPI_CS(1);
   return ReadData & 0xFF;
@@ -180,7 +169,7 @@ unsigned char ADXL345_SPI_Read(unsigned char Address)
 //////////////////////////////
 void PrintLCD(unsigned char data)
 {
-	LCD_Senddata((data/100)%10+0x30); 
+	LCD_Senddata((data/100)%10+0x30);
 	LCD_Senddata((data/10)%10+0x30);
 	LCD_Senddata((data/1)%10+0x30);
 }
@@ -189,9 +178,9 @@ void PrintLCD(unsigned char data)
 ///Delay100us涵式
 //////////////////////////////
 void Delay100us(short del)						//延遲del*200指令週期
-{	short i,j;									//@fSYS=8MH,延遲del*100us
-	for(i=0;i<del;i++)
-		for(j=0;j<=25;j++) GCC_NOP();
+{	unsigned short k,l;									//@fSYS=8MH,延遲del*100us
+	for(k=0;k<del;k++)
+		for(l=0;l<=25;l++)GCC_NOP();
 }	
 
 //////////////////////////////
@@ -215,28 +204,25 @@ void _SPI_SCL(unsigned short bLevel)
 //////////////////////////////
 ///SPI寫入涵式
 //////////////////////////////
-void ADXL345_SPI_Write(unsigned char Address, unsigned char WriteData)
+void ADXL345_SPI_Write(char Address, char WriteData)
 {
-  char i;
- 
   _SPI_CS(0);
- 
-  for(i=7; i >= 0; i--)
+  for(b=7;b>=0;b--)
   {
     // F-Edge
     _SPI_SCL(1);
-    SDO = 0x1 & ((0x7F & Address) >> i);
+    SDI = 0x1 & ((0x7F & Address) >> b);
     _SPI_SCL(0);
   }
- 
-  for(i=7; i >= 0; i--)
+  
+  for(b=7;b>=0;b--)
   {
     // F-Edge
     _SPI_SCL(1);
-    SDO = 0x1 & ((WriteData) >> i);
+    SDI = 0x1 & ((WriteData) >> b);
     _SPI_SCL(0);
   }
- 
+
   _SPI_CS(1);
 }
 
@@ -245,7 +231,7 @@ void LCD_Cmd(unsigned char data)
 {
     DATA_BUS = data;  //命令送到BUS
     RS=0; RW=0; EN=1; //命令到LCD內 
-    delay_ms(1);
+    Delay100us(20);
     EN=0;           //禁能LCD
 }
 //---傳送資料到LCD 
@@ -253,7 +239,7 @@ void LCD_Senddata(unsigned char data)
 {
     DATA_BUS = data;  //資料送到BUS
     RS=1; RW=0; EN=1; //資料到LCD內
-    delay_ms(1);
+	Delay100us(20);
     EN=0;           //禁能LCD
 }
 //---LCD的啟始程式  
@@ -271,13 +257,4 @@ void LCD_Reset(void)
                         //bit0:S=0,游標移位禁能                                   
     LCD_Cmd(0b00000001); //清除顯示幕
     LCD_Cmd(0b00000010); //游標回原位 
-}
-
-//////////////////////////////
-///Delay毫秒涵式
-//////////////////////////////
-void delay_ms(unsigned char del)
-{	
-	unsigned char i;
-	for(i=0;i<del;i++) GCC_DELAY(2000);		//內建函式，延遲2000指令週期
 }
