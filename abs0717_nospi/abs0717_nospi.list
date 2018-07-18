@@ -1,0 +1,1231 @@
+				;file D:\IIIT\Desktop\盛群程式\abs0717_nospi\abs0717_nospi.c
+				;1	#include "HT66F70A.h"
+				;2	typedef	unsigned char	u8;
+				;3	typedef	char			s8;
+				;4	typedef	unsigned short	u16;
+				;5	typedef	short			s16;
+				;6	typedef	unsigned long	u32;
+				;7	typedef	long			s32;
+				;8	//繼電器腳位
+				;9	#define Relay _pc0
+				;10	#define Relayc _pcc0
+				;11	//LED腳位
+				;12	#define led _pb6
+				;13	#define ledc _pbc6
+				;14	#define led2 _pb7
+				;15	#define ledc2 _pbc7
+				;16	//按鈕腳位
+				;17	#define  SW_P0			_pe0
+				;18	#define	 SW_P1 		    _pe1
+				;19	#define  SW_P0C			_pec0
+				;20	#define	 SW_P1C			_pec1
+				;21	//按鈕腳位電阻上拉
+				;22	#define  SW_P0PU		_pepu0
+				;23	#define	 SW_P1PU		_pepu1		
+				;24	#define	 SW_P2PU		_pepu2		
+				;25	#define	 SW_P3PU		_pepu3	
+				;26	
+				;27	#define WHEEL 24
+				;28	//計時變數
+				;29	u8 SEC,R1sec,s;
+				;30	//馬達變數
+				;31	s16 RollSpeed,temp,Index=100;
+				@ROMDATA_BASE .SECTION 'CODE'
+00C9	0064	dc	00064H
+00CA	0000	nop
+00CB	0000	nop
+00CC	0000	nop
+00CD	7407	clr     rc[5].0
+00CE	7B84	snz     rc[2].7
+00CF	28D6	jmp     L00D6
+00D0	7007	set     rc[5].0
+00D1	4183	cpl     rc[1]
+00D2	4184	cpl     rc[2]
+00D3	5483	inc     rc[1]
+00D4	3D0A	sz      Z
+00D5	5484	inc     rc[2]
+				L00D6:
+00D6	5F05	clr     rc[3]
+00D7	5F09	clr     rc[7]
+00D8	0F96	mov     a, 96H
+00D9	4086	mov     rc[4], a
+00DA	2987	jmp     L0187
+				L00DB:
+00DB	5A1E	rlca    rc[28]
+00DC	5A1A	rlca    rc[24]
+00DD	5A97	rlc     rc[21]
+00DE	409F	mov     rc[29], a
+00DF	5F1A	clr     rc[24]
+00E0	739E	set     rc[28].7
+00E1	509F	sz      rc[29]
+00E2	28E6	jmp     L00E6
+00E3	5F1C	clr     rc[26]
+00E4	5F1D	clr     rc[27]
+00E5	5F1E	clr     rc[28]
+				L00E6:
+00E6	5A15	rlca    rc[19]
+00E7	5A19	rlca    rc[23]
+00E8	5A97	rlc     rc[21]
+00E9	4096	mov     rc[20], a
+00EA	5F19	clr     rc[23]
+00EB	7395	set     rc[19].7
+00EC	5096	sz      rc[20]
+00ED	0003	ret
+				L00EE:
+00EE	5F13	clr     rc[17]
+00EF	5F14	clr     rc[18]
+00F0	5F15	clr     rc[19]
+				L00F1:
+00F1	5F19	clr     rc[23]
+00F2	0003	ret
+00F3	20DB	call    L00DB
+00F4	5F20	clr     rc[30]
+00F5	5F21	clr     rc[31]
+00F6	5F22	clr     rc[32]
+00F7	5F1B	clr     rc[25]
+00F8	0F7A	mov     a, 7AH
+00F9	431F	add     a, rc[29]
+00FA	4396	addm    a, rc[20]
+00FB	5B17	rrca    rc[21]
+00FC	4497	xorm    a, rc[21]
+00FD	0F07	mov     a, 7H
+00FE	409A	mov     rc[24], a
+				L00FF:
+00FF	5B9E	rrc     rc[28]
+0100	5B9D	rrc     rc[27]
+0101	5B9C	rrc     rc[26]
+0102	380A	snz     C
+0103	290C	jmp     L010C
+0104	4713	mov     a, rc[17]
+0105	43A0	addm    a, rc[30]
+0106	4714	mov     a, rc[18]
+0107	53A1	adcm    a, rc[31]
+0108	4715	mov     a, rc[19]
+0109	53A2	adcm    a, rc[32]
+010A	4719	mov     a, rc[23]
+010B	539B	adcm    a, rc[25]
+				L010C:
+010C	340A	clr     C
+010D	5A93	rlc     rc[17]
+010E	5A94	rlc     rc[18]
+010F	5A95	rlc     rc[19]
+0110	5A99	rlc     rc[23]
+0111	579A	sdz     rc[24]
+0112	28FF	jmp     L00FF
+0113	0F11	mov     a, 11H
+0114	409A	mov     rc[24], a
+0115	291B	jmp     L011B
+				L0116:
+0116	340A	clr     C
+0117	5B9B	rrc     rc[25]
+0118	5BA2	rrc     rc[32]
+0119	5BA1	rrc     rc[31]
+011A	5BA0	rrc     rc[30]
+				L011B:
+011B	5B9E	rrc     rc[28]
+011C	5B9D	rrc     rc[27]
+011D	5B9C	rrc     rc[26]
+011E	380A	snz     C
+011F	2928	jmp     L0128
+0120	4713	mov     a, rc[17]
+0121	43A0	addm    a, rc[30]
+0122	4714	mov     a, rc[18]
+0123	53A1	adcm    a, rc[31]
+0124	4715	mov     a, rc[19]
+0125	53A2	adcm    a, rc[32]
+0126	4719	mov     a, rc[23]
+0127	539B	adcm    a, rc[25]
+				L0128:
+0128	579A	sdz     rc[24]
+0129	2916	jmp     L0116
+012A	4720	mov     a, rc[30]
+012B	4093	mov     rc[17], a
+012C	4721	mov     a, rc[31]
+012D	4094	mov     rc[18], a
+012E	4722	mov     a, rc[32]
+012F	4095	mov     rc[19], a
+0130	471B	mov     a, rc[25]
+0131	4099	mov     rc[23], a
+0132	29C9	jmp     L01C9
+0133	20DB	call    L00DB
+0134	5F20	clr     rc[30]
+0135	5F21	clr     rc[31]
+0136	5F22	clr     rc[32]
+0137	5F1B	clr     rc[25]
+0138	509F	sz      rc[29]
+0139	293C	jmp     L013C
+013A	7118	set     rc[22].2
+013B	2966	jmp     L0166
+				L013C:
+013C	5016	sza     rc[20]
+013D	293F	jmp     L013F
+013E	2966	jmp     L0166
+				L013F:
+013F	421F	sub     a, rc[29]
+0140	0B77	add     a, 77H
+0141	4096	mov     rc[20], a
+0142	5B17	rrca    rc[21]
+0143	4497	xorm    a, rc[21]
+0144	0F20	mov     a, 20H
+0145	409F	mov     rc[29], a
+				L0146:
+0146	4713	mov     a, rc[17]
+0147	421C	sub     a, rc[26]
+0148	4714	mov     a, rc[18]
+0149	521D	sbc     a, rc[27]
+014A	4715	mov     a, rc[19]
+014B	521E	sbc     a, rc[28]
+014C	4719	mov     a, rc[23]
+014D	521A	sbc     a, rc[24]
+014E	380A	snz     C
+014F	295B	jmp     L015B
+0150	4099	mov     rc[23], a
+0151	4713	mov     a, rc[17]
+0152	421C	sub     a, rc[26]
+0153	4093	mov     rc[17], a
+0154	4714	mov     a, rc[18]
+0155	521D	sbc     a, rc[27]
+0156	4094	mov     rc[18], a
+0157	4715	mov     a, rc[19]
+0158	521E	sbc     a, rc[28]
+0159	4095	mov     rc[19], a
+015A	300A	set     C
+				L015B:
+015B	5AA0	rlc     rc[30]
+015C	5AA1	rlc     rc[31]
+015D	5AA2	rlc     rc[32]
+015E	5A9B	rlc     rc[25]
+015F	340A	clr     C
+0160	5A93	rlc     rc[17]
+0161	5A94	rlc     rc[18]
+0162	5A95	rlc     rc[19]
+0163	5A99	rlc     rc[23]
+0164	579F	sdz     rc[29]
+0165	2946	jmp     L0146
+				L0166:
+0166	4720	mov     a, rc[30]
+0167	4093	mov     rc[17], a
+0168	4721	mov     a, rc[31]
+0169	4094	mov     rc[18], a
+016A	4722	mov     a, rc[32]
+016B	4095	mov     rc[19], a
+016C	471B	mov     a, rc[25]
+016D	4099	mov     rc[23], a
+016E	29C9	jmp     L01C9
+016F	5A0E	rlca    rc[12]
+0170	5A0A	rlca    rc[8]
+0171	5A87	rlc     rc[5]
+0172	408F	mov     rc[13], a
+0173	5F0A	clr     rc[8]
+0174	738E	set     rc[12].7
+0175	508F	sz      rc[13]
+0176	297A	jmp     L017A
+0177	5F0C	clr     rc[10]
+0178	5F0D	clr     rc[11]
+0179	5F0E	clr     rc[12]
+				L017A:
+017A	5A05	rlca    rc[3]
+017B	5A09	rlca    rc[7]
+017C	5A87	rlc     rc[5]
+017D	4086	mov     rc[4], a
+017E	5F09	clr     rc[7]
+017F	7385	set     rc[3].7
+0180	5086	sz      rc[4]
+0181	0003	ret
+				L0182:
+0182	5F03	clr     rc[1]
+0183	5F04	clr     rc[2]
+0184	5F05	clr     rc[3]
+				L0185:
+0185	5F09	clr     rc[7]
+0186	0003	ret
+				L0187:
+0187	5086	sz      rc[4]
+0188	298A	jmp     L018A
+0189	2982	jmp     L0182
+				L018A:
+018A	5089	sz      rc[7]
+018B	29A1	jmp     L01A1
+018C	4703	mov     a, rc[1]
+018D	4504	or      a, rc[2]
+018E	4505	or      a, rc[3]
+018F	3D0A	sz      Z
+0190	2985	jmp     L0185
+				L0191:
+0191	7F85	sz      rc[3].7
+0192	29B2	jmp     L01B2
+0193	5786	sdz     rc[4]
+0194	2997	jmp     L0197
+0195	7008	set     rc[6].0
+0196	2982	jmp     L0182
+				L0197:
+0197	340A	clr     C
+0198	5A83	rlc     rc[1]
+0199	5A84	rlc     rc[2]
+019A	5A85	rlc     rc[3]
+019B	2991	jmp     L0191
+				L019C:
+019C	340A	clr     C
+019D	5B89	rrc     rc[7]
+019E	5B85	rrc     rc[3]
+019F	5B84	rrc     rc[2]
+01A0	5B83	rrc     rc[1]
+				L01A1:
+01A1	5486	inc     rc[4]
+01A2	5606	siza    rc[4]
+01A3	29A6	jmp     L01A6
+01A4	7088	set     rc[6].1
+01A5	282F	jmp     L002F
+				L01A6:
+01A6	5709	sdza    rc[7]
+01A7	299C	jmp     L019C
+01A8	300A	set     C
+01A9	5383	adcm    a, rc[1]
+01AA	5384	adcm    a, rc[2]
+01AB	5385	adcm    a, rc[3]
+01AC	3C0A	sz      C
+01AD	5486	inc     rc[4]
+01AE	5B89	rrc     rc[7]
+01AF	5B85	rrc     rc[3]
+01B0	5B84	rrc     rc[2]
+01B1	5B83	rrc     rc[1]
+				L01B2:
+01B2	5086	sz      rc[4]
+01B3	29B5	jmp     L01B5
+01B4	2982	jmp     L0182
+				L01B5:
+01B5	5B87	rrc     rc[5]
+01B6	5B06	rrca    rc[4]
+01B7	4089	mov     rc[7], a
+01B8	380A	snz     C
+01B9	7785	clr     rc[3].7
+01BA	0003	ret
+				L01BB:
+01BB	7417	clr     rc[21].0
+01BC	7B94	snz     rc[18].7
+01BD	29C4	jmp     L01C4
+01BE	7017	set     rc[21].0
+01BF	4193	cpl     rc[17]
+01C0	4194	cpl     rc[18]
+01C1	5493	inc     rc[17]
+01C2	3D0A	sz      Z
+01C3	5494	inc     rc[18]
+				L01C4:
+01C4	5F15	clr     rc[19]
+01C5	5F19	clr     rc[23]
+01C6	0F96	mov     a, 96H
+01C7	4096	mov     rc[20], a
+01C8	29C9	jmp     L01C9
+				L01C9:
+01C9	5096	sz      rc[20]
+01CA	29CC	jmp     L01CC
+01CB	28EE	jmp     L00EE
+				L01CC:
+01CC	5099	sz      rc[23]
+01CD	29E3	jmp     L01E3
+01CE	4713	mov     a, rc[17]
+01CF	4514	or      a, rc[18]
+01D0	4515	or      a, rc[19]
+01D1	3D0A	sz      Z
+01D2	28F1	jmp     L00F1
+				L01D3:
+01D3	7F95	sz      rc[19].7
+01D4	29F4	jmp     L01F4
+01D5	5796	sdz     rc[20]
+01D6	29D9	jmp     L01D9
+01D7	7018	set     rc[22].0
+01D8	28EE	jmp     L00EE
+				L01D9:
+01D9	340A	clr     C
+01DA	5A93	rlc     rc[17]
+01DB	5A94	rlc     rc[18]
+01DC	5A95	rlc     rc[19]
+01DD	29D3	jmp     L01D3
+				L01DE:
+01DE	340A	clr     C
+01DF	5B99	rrc     rc[23]
+01E0	5B95	rrc     rc[19]
+01E1	5B94	rrc     rc[18]
+01E2	5B93	rrc     rc[17]
+				L01E3:
+01E3	5496	inc     rc[20]
+01E4	5616	siza    rc[20]
+01E5	29E8	jmp     L01E8
+01E6	7098	set     rc[22].1
+01E7	29FD	jmp     L01FD
+				L01E8:
+01E8	5719	sdza    rc[23]
+01E9	29DE	jmp     L01DE
+01EA	300A	set     C
+01EB	5393	adcm    a, rc[17]
+01EC	5394	adcm    a, rc[18]
+01ED	5395	adcm    a, rc[19]
+01EE	3C0A	sz      C
+01EF	5496	inc     rc[20]
+01F0	5B99	rrc     rc[23]
+01F1	5B95	rrc     rc[19]
+01F2	5B94	rrc     rc[18]
+01F3	5B93	rrc     rc[17]
+				L01F4:
+01F4	5096	sz      rc[20]
+01F5	29F7	jmp     L01F7
+01F6	28EE	jmp     L00EE
+				L01F7:
+01F7	5B97	rrc     rc[21]
+01F8	5B16	rrca    rc[20]
+01F9	4099	mov     rc[23], a
+01FA	380A	snz     C
+01FB	7795	clr     rc[19].7
+01FC	0003	ret
+				L01FD:
+01FD	5F93	set     rc[17]
+01FE	5F94	set     rc[18]
+01FF	5F95	set     rc[19]
+0200	5F99	set     rc[23]
+0201	7817	snz     rc[21].0
+0202	7799	clr     rc[23].7
+0203	0003	ret
+				L0204:
+0204	20DB	call    L00DB
+0205	5F20	clr     rc[30]
+0206	5F21	clr     rc[31]
+0207	5F22	clr     rc[32]
+0208	5F1B	clr     rc[25]
+0209	0F7A	mov     a, 7AH
+020A	431F	add     a, rc[29]
+020B	4396	addm    a, rc[20]
+020C	5B17	rrca    rc[21]
+020D	4497	xorm    a, rc[21]
+020E	0F07	mov     a, 7H
+020F	409A	mov     rc[24], a
+				L0210:
+0210	5B9E	rrc     rc[28]
+0211	5B9D	rrc     rc[27]
+0212	5B9C	rrc     rc[26]
+0213	380A	snz     C
+0214	2A1D	jmp     L021D
+0215	4713	mov     a, rc[17]
+0216	43A0	addm    a, rc[30]
+0217	4714	mov     a, rc[18]
+0218	53A1	adcm    a, rc[31]
+0219	4715	mov     a, rc[19]
+021A	53A2	adcm    a, rc[32]
+021B	4719	mov     a, rc[23]
+021C	539B	adcm    a, rc[25]
+				L021D:
+021D	340A	clr     C
+021E	5A93	rlc     rc[17]
+021F	5A94	rlc     rc[18]
+0220	5A95	rlc     rc[19]
+0221	5A99	rlc     rc[23]
+0222	579A	sdz     rc[24]
+0223	2A10	jmp     L0210
+0224	0F11	mov     a, 11H
+0225	409A	mov     rc[24], a
+0226	2A2C	jmp     L022C
+				L0227:
+0227	340A	clr     C
+0228	5B9B	rrc     rc[25]
+0229	5BA2	rrc     rc[32]
+022A	5BA1	rrc     rc[31]
+022B	5BA0	rrc     rc[30]
+				L022C:
+022C	5B9E	rrc     rc[28]
+022D	5B9D	rrc     rc[27]
+022E	5B9C	rrc     rc[26]
+022F	380A	snz     C
+0230	2A39	jmp     L0239
+0231	4713	mov     a, rc[17]
+0232	43A0	addm    a, rc[30]
+0233	4714	mov     a, rc[18]
+0234	53A1	adcm    a, rc[31]
+0235	4715	mov     a, rc[19]
+0236	53A2	adcm    a, rc[32]
+0237	4719	mov     a, rc[23]
+0238	539B	adcm    a, rc[25]
+				L0239:
+0239	579A	sdz     rc[24]
+023A	2A27	jmp     L0227
+023B	4720	mov     a, rc[30]
+023C	4093	mov     rc[17], a
+023D	4721	mov     a, rc[31]
+023E	4094	mov     rc[18], a
+023F	4722	mov     a, rc[32]
+0240	4095	mov     rc[19], a
+0241	471B	mov     a, rc[25]
+0242	4099	mov     rc[23], a
+0243	29C9	jmp     L01C9
+				L0244:
+0244	20DB	call    L00DB
+0245	5F20	clr     rc[30]
+0246	5F21	clr     rc[31]
+0247	5F22	clr     rc[32]
+0248	5F1B	clr     rc[25]
+0249	509F	sz      rc[29]
+024A	2A4D	jmp     L024D
+024B	7118	set     rc[22].2
+024C	2A77	jmp     L0277
+				L024D:
+024D	5016	sza     rc[20]
+024E	2A50	jmp     L0250
+024F	2A77	jmp     L0277
+				L0250:
+0250	421F	sub     a, rc[29]
+0251	0B77	add     a, 77H
+0252	4096	mov     rc[20], a
+0253	5B17	rrca    rc[21]
+0254	4497	xorm    a, rc[21]
+0255	0F20	mov     a, 20H
+0256	409F	mov     rc[29], a
+				L0257:
+0257	4713	mov     a, rc[17]
+0258	421C	sub     a, rc[26]
+0259	4714	mov     a, rc[18]
+025A	521D	sbc     a, rc[27]
+025B	4715	mov     a, rc[19]
+025C	521E	sbc     a, rc[28]
+025D	4719	mov     a, rc[23]
+025E	521A	sbc     a, rc[24]
+025F	380A	snz     C
+0260	2A6C	jmp     L026C
+0261	4099	mov     rc[23], a
+0262	4713	mov     a, rc[17]
+0263	421C	sub     a, rc[26]
+0264	4093	mov     rc[17], a
+0265	4714	mov     a, rc[18]
+0266	521D	sbc     a, rc[27]
+0267	4094	mov     rc[18], a
+0268	4715	mov     a, rc[19]
+0269	521E	sbc     a, rc[28]
+026A	4095	mov     rc[19], a
+026B	300A	set     C
+				L026C:
+026C	5AA0	rlc     rc[30]
+026D	5AA1	rlc     rc[31]
+026E	5AA2	rlc     rc[32]
+026F	5A9B	rlc     rc[25]
+0270	340A	clr     C
+0271	5A93	rlc     rc[17]
+0272	5A94	rlc     rc[18]
+0273	5A95	rlc     rc[19]
+0274	5A99	rlc     rc[23]
+0275	579F	sdz     rc[29]
+0276	2A57	jmp     L0257
+				L0277:
+0277	4720	mov     a, rc[30]
+0278	4093	mov     rc[17], a
+0279	4721	mov     a, rc[31]
+027A	4094	mov     rc[18], a
+027B	4722	mov     a, rc[32]
+027C	4095	mov     rc[19], a
+027D	471B	mov     a, rc[25]
+027E	4099	mov     rc[23], a
+027F	29C9	jmp     L01C9
+				;32	//
+				;33	float Speed,SpeedArray[3];
+				;34	
+				;35	void Interrupt_Pin();	//外部中斷設定
+				;36	void TM_Pin();  		//時間中斷設定
+				;37	void Moto_Pin();		//馬達初始
+				;38	void Moto_control();	//馬達控制
+				;39	void Delay100us(u16);	
+				;40	
+				;41	float Operation_Speed();//計算時速
+				;42	void Read_Speed();		//佇列擺放
+				;43	void main()
+				;44	{
+				@code .SECTION 'CODE'
+				include HT66F70A.inc
+0000	1F0B	clr     BP
+0001	280C	jmp     begin_startup_value
+0002	0000	nop
+0003	0000	nop
+				end_startup_value:
+				@start .SECTION 'CODE'
+002C	0F00	mov     a, 0H
+002D	008B	mov     BP, a
+002E	2AB1	jmp     _main
+				L002F:
+002F	5F83	set     rc[1]
+0030	5F84	set     rc[2]
+0031	5F85	set     rc[3]
+0032	5F89	set     rc[7]
+0033	7807	snz     rc[5].0
+0034	7789	clr     rc[7].7
+0035	0003	ret
+0036	0000	nop
+0037	0000	nop
+				;45		_wdtc=0xaf; 
+				_main:
+				_main:
+02B1	0FAF	mov     a, AFH
+02B2	00BE	mov     WDTC, a
+				;46		ledc=0; ledc2=0;
+02B3	3717	clr     PBC6
+02B4	3797	clr     PBC7
+				;47		RollSpeed=0;
+02B5	5F39	clr     RollSpeed[0]
+02B6	5F3A	clr     RollSpeed[1]
+				;48		TM_Pin();
+02B7	229B	call    _TM_Pin
+				;49		Moto_Pin();
+02B8	228D	call    _Moto_Pin
+				;50		Interrupt_Pin();
+02B9	2280	call    _Interrupt_Pin
+				;51	
+				;52		_emi=1;
+02BA	3030	set     EMI
+				_L5:
+02BB	2ABB	jmp     $
+02BC	2ABC	jmp     $
+				L02BD:
+02BD	5F34	clr     r238[5]
+02BE	5F35	clr     r238[6]
+				L02BF:
+02BF	7832	snz     r238[3].0
+02C0	2AC5	jmp     L02C5
+02C1	4730	mov     a, r238[1]
+02C2	43B4	addm    a, r238[5]
+02C3	4731	mov     a, r238[2]
+02C4	53B5	adcm    a, r238[6]
+				L02C5:
+02C5	340A	clr     C
+02C6	5AB0	rlc     r238[1]
+02C7	5AB1	rlc     r238[2]
+02C8	340A	clr     C
+02C9	5BB3	rrc     r238[4]
+02CA	5BB2	rrc     r238[3]
+02CB	4732	mov     a, r238[3]
+02CC	4533	or      a, r238[4]
+02CD	390A	snz     Z
+02CE	2ABF	jmp     L02BF
+				@dummy .SECTION 'CODE'
+02CF	0003	ret
+				;53		while(1)
+				;54		{	
+				;55			
+				;56		}
+				;57	}
+				;58	
+				;59	void TM_Pin(){				//時間中斷設定
+				;60		_tm4c0=0b00100000;							
+				_TM_Pin:
+				_TM_Pin:
+029B	0F20	mov     a, 20H
+029C	80D0	lmov    TM4C0, a
+				;61		_tm4c1=0b11000001;							
+029E	0FC1	mov     a, C1H
+029F	80D1	lmov    TM4C1, a
+				;62		_tm4al=5000%256; _tm4ah=5000/256;         	
+02A1	0F88	mov     a, 88H
+02A2	80D4	lmov    TM4AL, a
+02A4	0F13	mov     a, 13H
+02A5	80D5	lmov    TM4AH, a
+				;63		_mf4e=1; _t4ae=1; 							
+02A7	3133	set     MF4E
+02A8	30B8	set     T4AE
+				;64		_t4on=1;
+02A9	B1D0	lset    T4ON
+				;65		SEC=0; R1sec=100; s=2;
+02AB	5F3D	clr     SEC[0]
+02AC	0F64	mov     a, 64H
+02AD	40BC	mov     R1sec[0], a
+02AE	0F02	mov     a, 2H
+02AF	40BB	mov     s[0], a
+02B0	0003	ret
+				;66	}
+				;67	
+				;68	void Moto_Pin(){			//馬達設定
+				;69		SW_P0C=1; SW_P0PU=1;	//規劃按鍵腳位為輸入屬性並啟用提升電阻
+				_Moto_Pin:
+				_Moto_Pin:
+028D	3023	set     PEC0
+028E	3021	set     PEPU0
+				;70		SW_P1C=1; SW_P1PU=1;
+028F	30A3	set     PEC1
+0290	30A1	set     PEPU1
+				;71		_pds2=0x01;				//設定PD4為TP2功能
+0291	0F01	mov     a, 1H
+0292	80EE	lmov    PDS2, a
+				;72		_tm2c0=0b00000000;
+0294	1F51	clr     TM2C0
+				;73		_tm2c1=0b10101000;
+0295	0FA8	mov     a, A8H
+0296	00D2	mov     TM2C1, a
+				;74		_tm2rp=160;
+0297	0FA0	mov     a, A0H
+0298	00D7	mov     TM2RP, a
+				;75		_t2on=1;
+0299	31D1	set     T2ON
+029A	0003	ret
+				;76	}
+				;77	
+				;78	void Interrupt_Pin(){		//外部中斷設定 
+				;79		_pac3=1; _papu3=1;
+				_Interrupt_Pin:
+				_Interrupt_Pin:
+0280	3193	set     PAC3
+0281	3191	set     PAPU3
+				;80		_integ=0b00000101;		//正緣觸發中斷
+0282	0F05	mov     a, 5H
+0283	00B9	mov     INTEG, a
+				;81		_int0e=1;
+0284	30B0	set     INT0E
+				;82		_ifs0=0x00;
+0285	9F48	lclr    IFS0
+				;83		_pac4=1; _papu4=1;
+0287	3213	set     PAC4
+0288	3211	set     PAPU4
+				;84		_int1e=1;
+0289	3130	set     INT1E
+				;85		_ifs1=0x00;
+028A	9F49	lclr    IFS1
+028C	0003	ret
+				;86	}
+				;87	
+				;88	void Moto_control(){
+				;89		/*temp=Index*20+1000;
+				;90		_tm2al=temp%256;
+				;91		_tm2ah=temp/256;
+				;92		temp>>=1;
+				;93		Delay100us(100)*/
+				;94			if(!SW_P0)
+				_Moto_control:
+				_Moto_control:
+00BD	3C22	sz      PE0
+00BE	28C1	jmp     _L8
+				;95			{
+				;96				Index=0;
+00BF	5F37	clr     Index[0]
+00C0	5F38	clr     Index[1]
+				;97				//break;
+				;98			}
+				;99			if(!SW_P1)
+				_L8:
+00C1	3CA2	sz      PE1
+00C2	28C6	jmp     _L7
+				;100			{
+				;101				Index=180;
+00C3	0FB4	mov     a, B4H
+00C4	40B7	mov     Index[0], a
+00C5	5F38	clr     Index[1]
+				_L7:
+00C6	0003	ret
+				startup_value:
+				@ROMDATA_BASE .SECTION 'CODE'
+00C7	0002	halt
+00C8	00B7	mov     MFI3, a
+				;102			}
+				;103	}
+				;104	
+				;105	float Operation_Speed() //計算時速
+				;106	{
+				;107		float HourSpeed;
+				;108		HourSpeed=RollSpeed*WHEEL*2.54*60/1000;
+				_Operation_Speed:
+				_Operation_Speed:
+02D0	4739	mov     a, RollSpeed[0]
+02D1	40B0	mov     r238[1], a
+02D2	473A	mov     a, RollSpeed[1]
+02D3	40B1	mov     r238[2], a
+02D4	0F18	mov     a, 18H
+02D5	40B2	mov     r238[3], a
+02D6	5F33	clr     r238[4]
+02D7	22BD	call    L02BD
+02D8	4734	mov     a, r238[5]
+02D9	40A3	mov     rd38, a
+02DA	4735	mov     a, r238[6]
+02DB	40A4	mov     re38, a
+02DC	4724	mov     a, re38
+02DD	4094	mov     rc[18], a
+02DE	4723	mov     a, rd38
+02DF	4093	mov     rc[17], a
+02E0	21BB	call    L01BB
+02E1	4719	mov     a, rc[23]
+02E2	40A5	mov     rg38, a
+02E3	4715	mov     a, rc[19]
+02E4	40A6	mov     rf38, a
+02E5	4714	mov     a, rc[18]
+02E6	40A4	mov     re38, a
+02E7	4713	mov     a, rc[17]
+02E8	40A3	mov     rd38, a
+02E9	4725	mov     a, rg38
+02EA	4099	mov     rc[23], a
+02EB	4726	mov     a, rf38
+02EC	4095	mov     rc[19], a
+02ED	4724	mov     a, re38
+02EE	4094	mov     rc[18], a
+02EF	4723	mov     a, rd38
+02F0	4093	mov     rc[17], a
+02F1	0F40	mov     a, 40H
+02F2	409A	mov     rc[24], a
+02F3	0F22	mov     a, 22H
+02F4	409E	mov     rc[28], a
+02F5	0F8F	mov     a, 8FH
+02F6	409D	mov     rc[27], a
+02F7	0F5C	mov     a, 5CH
+02F8	409C	mov     rc[26], a
+02F9	2204	call    L0204
+02FA	4719	mov     a, rc[23]
+02FB	40A5	mov     rg38, a
+02FC	4715	mov     a, rc[19]
+02FD	40A6	mov     rf38, a
+02FE	4714	mov     a, rc[18]
+02FF	40A4	mov     re38, a
+0300	4713	mov     a, rc[17]
+0301	40A3	mov     rd38, a
+0302	4725	mov     a, rg38
+0303	4099	mov     rc[23], a
+0304	4726	mov     a, rf38
+0305	4095	mov     rc[19], a
+0306	4724	mov     a, re38
+0307	4094	mov     rc[18], a
+0308	4723	mov     a, rd38
+0309	4093	mov     rc[17], a
+030A	0F42	mov     a, 42H
+030B	409A	mov     rc[24], a
+030C	0F70	mov     a, 70H
+030D	409E	mov     rc[28], a
+030E	0F00	mov     a, 0H
+030F	409D	mov     rc[27], a
+0310	0F00	mov     a, 0H
+0311	409C	mov     rc[26], a
+0312	2204	call    L0204
+0313	4719	mov     a, rc[23]
+0314	40A5	mov     rg38, a
+0315	4715	mov     a, rc[19]
+0316	40A6	mov     rf38, a
+0317	4714	mov     a, rc[18]
+0318	40A4	mov     re38, a
+0319	4713	mov     a, rc[17]
+031A	40A3	mov     rd38, a
+031B	4725	mov     a, rg38
+031C	4099	mov     rc[23], a
+031D	4726	mov     a, rf38
+031E	4095	mov     rc[19], a
+031F	4724	mov     a, re38
+0320	4094	mov     rc[18], a
+0321	4723	mov     a, rd38
+0322	4093	mov     rc[17], a
+0323	0F44	mov     a, 44H
+0324	409A	mov     rc[24], a
+0325	0F7A	mov     a, 7AH
+0326	409E	mov     rc[28], a
+0327	0F00	mov     a, 0H
+0328	409D	mov     rc[27], a
+0329	0F00	mov     a, 0H
+032A	409C	mov     rc[26], a
+032B	2244	call    L0244
+032C	4719	mov     a, rc[23]
+032D	40A5	mov     rg38, a
+032E	4715	mov     a, rc[19]
+032F	40A6	mov     rf38, a
+0330	4714	mov     a, rc[18]
+0331	40A4	mov     re38, a
+0332	4713	mov     a, rc[17]
+0333	40A3	mov     rd38, a
+				;109		RollSpeed=0;	
+0334	5F39	clr     RollSpeed[0]
+0335	5F3A	clr     RollSpeed[1]
+				;110		return HourSpeed;
+				;111	}
+0336	4725	mov     a, rg38
+0337	40A7	mov     rc38, a
+0338	4726	mov     a, rf38
+0339	40A8	mov     rb38, a
+033A	4724	mov     a, re38
+033B	40A9	mov     ra38, a
+033C	0003	ret
+				;112	
+				;113	
+				;114	DEFINE_ISR(button_up,0x04)	//外部中斷
+				;115	{	 
+				@button_up_code .SECTION 'CODE'
+0004	40AA	mov     r104, a
+0005	070B	mov     a, BP
+0006	1F0B	clr     BP
+0007	283C	jmp     _button_up
+				@dummy56 .SECTION 'CODE'
+				_button_up:
+				_button_up:
+003C	40AB	mov     r204, a
+003D	070A	mov     a, STATUS
+003E	40CC	mov     r304, a
+				;116		led2=0;
+003F	3796	clr     PB7
+				;117		RollSpeed++;
+0040	54B9	inc     RollSpeed[0]
+0041	3D0A	sz      Z
+0042	54BA	inc     RollSpeed[1]
+				;118		_int0f = 0;	
+0043	3630	clr     INT0F
+0044	472B	mov     a, r204
+0045	008B	mov     BP, a
+0046	474C	mov     a, r304
+0047	008A	mov     STATUS, a
+0048	472A	mov     a, r104
+0049	0004	reti
+				;119	}
+				;120	
+				;121	DEFINE_ISR(Button_Down,0x08)
+				;122	{	
+				@Button_Down_code .SECTION 'CODE'
+				@dummy4 .SECTION 'CODE'
+0008	40AC	mov     r108, a
+0009	070B	mov     a, BP
+000A	1F0B	clr     BP
+000B	284A	jmp     _Button_Down
+				_Button_Down:
+				_Button_Down:
+004A	40AD	mov     r208, a
+004B	070A	mov     a, STATUS
+004C	40CD	mov     r308, a
+				;123		led2=1;
+004D	3396	set     PB7
+				;124		_int1f = 0;
+004E	36B0	clr     INT1F
+004F	472D	mov     a, r208
+0050	008B	mov     BP, a
+0051	474D	mov     a, r308
+0052	008A	mov     STATUS, a
+0053	472C	mov     a, r108
+0054	0004	reti
+				;125	}
+				;126	
+				;127	DEFINE_ISR(ISR_STM,0x38)  	//時間中斷
+				;128	{			
+				@ISR_STM_code .SECTION 'CODE'
+0038	40AE	mov     r138, a
+0039	070B	mov     a, BP
+003A	1F0B	clr     BP
+003B	2855	jmp     _ISR_STM
+				_ISR_STM:
+				_ISR_STM:
+0055	40AF	mov     r238, a
+0056	070A	mov     a, STATUS
+0057	40CE	mov     r338, a
+0058	0703	mov     a, MP1L
+0059	40CF	mov     r438, a
+005A	0704	mov     a, MP1H
+005B	40D0	mov     r538, a
+005C	0707	mov     a, TBLP
+005D	40D1	mov     r638, a
+005E	0709	mov     a, TBHP
+005F	40D2	mov     r738, a
+				;129	    if(--R1sec==0)
+0060	553C	deca    R1sec[0]
+0061	40A9	mov     ra38, a
+0062	4729	mov     a, ra38
+0063	40BC	mov     R1sec[0], a
+0064	50A9	sz      ra38
+0065	28AD	jmp     _L15
+				;130	    {
+				;131	    
+				;132	    	led=1;
+0066	3316	set     PB6
+				;133	    	R1sec=100;
+0067	0F64	mov     a, 64H
+0068	40BC	mov     R1sec[0], a
+				;134	    	if(s<=2){
+0069	473B	mov     a, s[0]
+006A	40B6	mov     _ISR_STM_2, a
+006B	0F02	mov     a, 2H
+006C	4236	sub     a, _ISR_STM_2
+006D	380A	snz     C
+006E	2893	jmp     _L16
+				;135	    		SpeedArray[s]=Operation_Speed();
+006F	22D0	call    _Operation_Speed
+0070	4736	mov     a, _ISR_STM_2
+0071	40A3	mov     rd38, a
+0072	5F24	clr     re38
+0073	340A	clr     C
+0074	5A23	rlca    rd38
+0075	40A6	mov     rf38, a
+0076	5A24	rlca    re38
+0077	40A5	mov     rg38, a
+0078	4726	mov     a, rf38
+0079	43A3	addm    a, rd38
+007A	4725	mov     a, rg38
+007B	53A4	adcm    a, re38
+007C	0FC1	mov     a, C1H
+007D	4323	add     a, rd38
+007E	0083	mov     MP1L, a
+007F	0F00	mov     a, 0H
+0080	5324	adc     a, re38
+0081	0084	mov     MP1H, a
+0082	4729	mov     a, ra38
+0083	0082	mov     [02H], a
+0084	1483	inc     MP1L
+0085	4728	mov     a, rb38
+0086	0082	mov     [02H], a
+0087	1483	inc     MP1L
+0088	4727	mov     a, rc38
+0089	0082	mov     [02H], a
+				;136	    		Speed=Operation_Speed();
+008A	22D0	call    _Operation_Speed
+008B	4729	mov     a, ra38
+008C	40BE	mov     Speed[0], a
+008D	4728	mov     a, rb38
+008E	40BF	mov     Speed[1], a
+008F	4727	mov     a, rc38
+0090	40C0	mov     Speed[2], a
+				;137	    		s--;
+0091	55BB	dec     s[0]
+0092	28A3	jmp     _L17
+				;138	    	}else{
+				;139	    		s=2;
+				_L16:
+0093	0F02	mov     a, 2H
+0094	40BB	mov     s[0], a
+				;140	    		SpeedArray[s]=Operation_Speed();
+0095	22D0	call    _Operation_Speed
+0096	4729	mov     a, ra38
+0097	40C7	mov     SpeedArray[6], a
+0098	4728	mov     a, rb38
+0099	40C8	mov     SpeedArray[7], a
+009A	4727	mov     a, rc38
+009B	40C9	mov     SpeedArray[8], a
+				;141	    		Speed=Operation_Speed();
+009C	22D0	call    _Operation_Speed
+009D	4729	mov     a, ra38
+009E	40BE	mov     Speed[0], a
+009F	4728	mov     a, rb38
+00A0	40BF	mov     Speed[1], a
+00A1	4727	mov     a, rc38
+00A2	40C0	mov     Speed[2], a
+				;142	    	}
+				;143	    	if(++SEC==5)
+				_L17:
+00A3	543D	inca    SEC[0]
+00A4	40A9	mov     ra38, a
+00A5	4729	mov     a, ra38
+00A6	40BD	mov     SEC[0], a
+00A7	4729	mov     a, ra38
+00A8	0A05	sub     a, 5H
+00A9	390A	snz     Z
+00AA	28AD	jmp     _L15
+				;144	    	{
+				;145	    	led=0;
+00AB	3716	clr     PB6
+				;146	     	SEC=0;
+00AC	5F3D	clr     SEC[0]
+				;147	     	}
+				;148	     	
+				;149	    }
+				;150	    _t4af=0;
+				_L15:
+00AD	36B8	clr     T4AF
+00AE	472F	mov     a, r238
+00AF	008B	mov     BP, a
+00B0	474E	mov     a, r338
+00B1	008A	mov     STATUS, a
+00B2	474F	mov     a, r438
+00B3	0083	mov     MP1L, a
+00B4	4750	mov     a, r538
+00B5	0084	mov     MP1H, a
+00B6	4751	mov     a, r638
+00B7	0087	mov     TBLP, a
+00B8	4752	mov     a, r738
+00B9	0089	mov     TBHP, a
+00BA	1D05	tabrd   ACC
+00BB	472E	mov     a, r138
+00BC	0004	reti
+				;151	}
+				;152	
+				;153	void Delay100us(u16 del)						//延遲del*200指令週期
+				;154	{	u16 i,j;									//@fSYS=8MH,延遲del*100us
+				;155		for(i=0;i<del;i++)
+				_Delay100us:
+				_Delay100us:
+033D	5F01	clr     rb
+033E	5F02	clr     rc
+				_L20:
+033F	4701	mov     a, rb
+0340	4237	sub     a, del[0]
+0341	4702	mov     a, rc
+0342	5238	sbc     a, del[1]
+0343	3F0A	sz      CZ
+0344	2B50	jmp     _L19
+0345	5F00	clr     ra
+034C	5481	inc     rb
+034D	3D0A	sz      Z
+034E	5482	inc     rc
+034F	2B3F	jmp     _L20
+				_L19:
+0350	0003	ret
+				;156			for(j=0;j<=25;j++) GCC_NOP();
+				_L23:
+0346	0000	nop
+0347	5480	inc     ra
+0348	4700	mov     a, ra
+0349	0A1A	sub     a, 1AH
+034A	390A	snz     Z
+034B	2B46	jmp     _L23
+				;157	}
+				;file D:\IIIT\Desktop\盛群程式\abs0717_nospi\startup1_l.asm
+				;1	;;--------------------------------------------------------------;;
+				;2	;;    This file is part of the Holtek C Compiler V3 package     ;;
+				;3	;;    For the initialization of static linkage variables        ;;
+				;4	;;    Copyright (C) 2013 Holtek Semiconductor Inc.              ;;
+				;5	;;    Version: 1.04 (Above IDE3000 V7.72)                       ;;
+				;6	;;    Date:    2013/12/04                                        ;;
+				;7	;;--------------------------------------------------------------;;
+				;8	
+				;9	acc equ [05h]
+				;10	tblp equ [07h]
+				;11	tblh equ [08h]
+				;12	;;tbhp equ [09h] 
+				;13	mp0 equ [01h]
+				;14	r1 equ [02h]
+				;15	mp1l equ [03h]
+				;16	mp1h equ [04h]
+				;17	z equ [0ah].2
+				;18	c equ [0ah].0
+				;19	
+				;20	ifndef tbhp
+				;21	tbhp equ [09h]
+				;22	endif
+				;23	 
+				;24	extern startup_value_1:near
+				;25	
+				;26	@start .section 'code'
+				;27	begin_startup_value:
+				;28	  mov a,low (offset startup_value_1) 
+				begin_startup_value:
+				@start .SECTION 'CODE'
+				@dummy8 .SECTION 'CODE'
+				_main_startup1:
+				@start .SECTION 'CODE'
+000C	0FC6	mov     a, C6H
+				;29	  mov tblp,a
+000D	0087	mov     TBLP, a
+				;30	  mov a,high (offset startup_value_1) 
+000E	0F00	mov     a, 0H
+				;31	  mov tbhp,a
+000F	0089	mov     TBHP, a
+				;32	next_table:
+				;33	  ;CLR WDT
+				;34	  inc tblp
+				next_table:
+0010	1487	inc     TBLP
+				;35	  sz z
+0011	3D0A	sz      Z
+				;36	  inc tbhp
+0012	1489	inc     TBHP
+				;37	  tabrdc mp0
+0013	1D01	tabrd   MP0
+				;38	  sz mp0
+0014	1081	sz      MP0
+				;39	  jmp read_data
+0015	2817	jmp     read_data
+				;40	  jmp end_startup_value
+0016	282C	jmp     end_startup_value
+				;41	read_data:
+				;42	  inc tblp
+				read_data:
+0017	1487	inc     TBLP
+				;43	  sz z
+0018	3D0A	sz      Z
+				;44	  inc tbhp
+0019	1489	inc     TBHP
+				;45	  tabrdc mp1l
+001A	1D03	tabrd   MP1L
+				;46	  mov a,tblh
+001B	0708	mov     a, TBLH
+				;47	  mov mp1h,a
+001C	0084	mov     MP1H, a
+				;48	next_data:
+				;49	  inc tblp
+				next_data:
+001D	1487	inc     TBLP
+				;50	  sz z
+001E	3D0A	sz      Z
+				;51	  inc tbhp
+001F	1489	inc     TBHP
+				;52	  tabrdc acc
+0020	1D05	tabrd   ACC
+				;53	  mov r1,a
+0021	0082	mov     [02H], a
+				;54	  sdz mp0
+0022	1781	sdz     MP0
+				;55	  jmp $+2
+0023	2825	jmp     L0025
+				;56	  jmp next_table
+0024	2810	jmp     next_table
+				;57	  inc mp1l
+				L0025:
+0025	1483	inc     MP1L
+				;58	  mov a,tblh
+0026	0708	mov     a, TBLH
+				;59	  mov r1,a
+0027	0082	mov     [02H], a
+				;60	  inc mp1l
+0028	1483	inc     MP1L
+				;61	  sdz mp0
+0029	1781	sdz     MP0
+				;62	  jmp next_data
+002A	281D	jmp     next_data
+				;63	  jmp next_table
+002B	2810	jmp     next_table
+				;64	
+				;65	end_startup_value:
+				;66	
+				;67	   
+				;68	@ROMDATA_BASE .SECTION com_l 'CODE'  
+				;69	startup_value:
+				;70	;;linker range the initial value table here
+				data .SECTION 'DATA'
+				__papu DB DUP (?) ; __papu
+				__pac DB DUP (?) ; __pac
+				__pb DB DUP (?) ; __pb
+				__pbc DB DUP (?) ; __pbc
+				__pepu DB DUP (?) ; __pepu
+				__pe DB DUP (?) ; __pe
+				__pec DB DUP (?) ; __pec
+				__intc0 DB DUP (?) ; __intc0
+				__intc3 DB DUP (?) ; __intc3
+				__mfi4 DB DUP (?) ; __mfi4
+				__integ DB DUP (?) ; __integ
+				__wdtc DB DUP (?) ; __wdtc
+				__tm2c0 DB DUP (?) ; __tm2c0
+				__tm2c1 DB DUP (?) ; __tm2c1
+				__tm2rp DB DUP (?) ; __tm2rp
+				ra DB DUP (?)
+				rb DB DUP (?)
+				rc DB DUP (?)
+				rd38 DB DUP (?)
+				re38 DB DUP (?)
+				rg38 DB DUP (?)
+				rf38 DB DUP (?)
+				rc38 DB DUP (?)
+				rb38 DB DUP (?)
+				ra38 DB DUP (?)
+				r104 DB DUP (?)
+				r204 DB DUP (?)
+				r108 DB DUP (?)
+				r208 DB DUP (?)
+				r138 DB DUP (?)
+				r238 DB DUP (?)
+				_ISR_STM_2 DB DUP (?)
+				Index DB 2 DUP (?) ; Index
+				RollSpeed DB 2 DUP (?) ; RollSpeed
+				s DB DUP (?) ; s
+				R1sec DB DUP (?) ; R1sec
+				SEC DB DUP (?) ; SEC
+				Speed DB 4 DUP (?) ; Speed
+				SpeedArray DB DUP (?) ; SpeedArray
+				temp DB 2 DUP (?) ; temp
+				r304 DB DUP (?)
+				r308 DB DUP (?)
+				r338 DB DUP (?)
+				r438 DB DUP (?)
+				r538 DB DUP (?)
+				r638 DB DUP (?)
+				r738 DB DUP (?)
+				__ifs0 DB DUP (?) ; __ifs0
+				__ifs1 DB DUP (?) ; __ifs1
+				__tm4c0 DB DUP (?) ; __tm4c0
+				__tm4c1 DB DUP (?) ; __tm4c1
+				__tm4al DB DUP (?) ; __tm4al
+				__tm4ah DB DUP (?) ; __tm4ah
+				__pds2 DB DUP (?) ; __pds2
